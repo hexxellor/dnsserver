@@ -1,0 +1,20 @@
+----------------------------------------------------------------------
+El desarrollo sería un DNS server que simplemente acepte consultas de 
+nombres y devuelva una o varias direcciones IPs asociada a él.
+
+Los requisitos serían:
+ - Linux/Solaris/HP-UX preferiblemente en C++ (C también se acepta)
+ - Soporte del DNS Query únicamente
+ - Las correspondencias host/IP se leen de un fichero tipo /etc/host
+
+Los criterios de evaluación son (por este orden):
+ - Robustez
+ - Simplicidad
+ - Eficiencia
+ - Rapidez
+
+Vale usar fuentes de terceros, pero hay que explicar cuál es, por qué 
+se ha elegido y qué adaptaciones se le han hecho.
+
+No dudes en consultarnos si tienes cualquier duda.
+----------------------------------------------------------------------
