@@ -39,18 +39,17 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
 
     //SEARCHDATABASE atomicQuery.Name;!!
 
-    searchResponse = dnsDataBaseReader->searchIPbyURL(atomicQuery.Name);
+    searchResponse = dnsDataBaseReader->searchIPbyURL( atomicQuery.Name );
 
     if (searchResponse > 0 )
     {
-      getIP
-      responseLength = responseLength + addResponseRecord(bufferRRs);
-
+      responseLength = responseLength + addResponseRecord(bufferRRs, (char *)dnsDataBaseReader->getFoundIP().c_str());
       printf("%s : %i\n responseLength %i\n", __FUNCTION__, __LINE__, responseLength);
     }
     else
     {
-       //return algo
+       //Not found in data base!
+       return -1;
     }
 
   }
@@ -81,7 +80,7 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
   return (nameCounter + 4);
 }
 
-int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace)
+int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace, char *resolvedIP)
 {
 
   int lengthRecord;
@@ -98,10 +97,8 @@ int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace)
   //memcpy(rrBufferPlace[],0,4);
 
   responseRecord->rdLength = ntohs((uint16_t)0x0004);
- 
-  printf("Escrito %i\n", responseRecord->rdLength);
 
-  if (inet_aton("66.102.9.104", &intAddress) == 0)
+  if (inet_aton(resolvedIP, &intAddress) == 0)
   {
     printf("Dir IP no valida\n");
   }

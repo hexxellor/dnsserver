@@ -10,6 +10,8 @@ extern "C"
 #include <defs.h>
 #include <dnsdatabasereader.h>
 
+#include <string>
+
 #define COMPRESSED_MASK 0xc000;
 
 /*
@@ -55,7 +57,7 @@ class DNSResolver
     /*
      * @brief Add response record to response packet
      */
-    int addResponseRecord(unsigned char *rrBufferPlace);
+    int addResponseRecord(unsigned char *rrBufferPlace, char *resolvedIP);
 };
 
 #endif /* DNSRESOLVER_H */

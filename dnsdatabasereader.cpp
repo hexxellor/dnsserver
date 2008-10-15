@@ -14,14 +14,14 @@ DNSDataBaseReader::~DNSDataBaseReader()
 
 string DNSDataBaseReader::getFoundIP()
 {
-
+  return(resolvedIP);
 }
 
 //Search the name in local database. Returns:
 //1 - 
 
 
-int DNSDataBaseReader::searchIPbyURL(string &askedURL)
+int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 {
   
   size_t beginComment, beginHostIP, endHostIP, beginHostName, endHostName, beginHostAlias, endHostAlias;
@@ -30,7 +30,7 @@ int DNSDataBaseReader::searchIPbyURL(string &askedURL)
   if (ifsHosts)
   {
     //Positioning in the begining of the buffer
-    ifsHosts.seek(0, std::beg);
+    ifsHosts.seekg(0, ios_base::beg);
 
     while (getline(ifsHosts, line))
     {

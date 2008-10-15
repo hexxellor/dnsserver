@@ -30,6 +30,8 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
   dnsRequestLength = dnsPktLength;
   dnsResponseLength = dnsRequestLength;
 
+  unsigned int dnsResponseRRsLength = 0;
+
   //First intialize answer packet
   initializeDnsQueryResponse();
 
@@ -38,9 +40,16 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
 
   if (dnsError == NO_ERROR)
   {
-    //procesa y genera RRs
-    //ir sumando los bytes a dnsResponseLength!!
-    dnsResponseLength = dnsResponseLength + dnsResolver->resolveQueryRequest(dnsQueryRRsPointer, qdCount);
+
+    if ( (dnsResponseRRsLength = dnsResolver->resolveQueryRequest(dnsQueryRRsPointer, qdCount)) == -1 )
+    {
+       // URL/Alias not found!
+       dnsError = NAME_ERROR;
+    }
+    else
+    {
+      dnsResponseLength = dnsResponseLength + dnsResponseRRsLength;
+    }
 
   }
 
