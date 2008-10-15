@@ -30,7 +30,7 @@ class DNSDataBaseReader
     /*
      * @brief Function to search in /etc/hosts
      */
-    int searchIPbyURL(string &askedURL);
+    int searchIPbyURL(char *askedURL);
 
     string getFoundIP();
     //searchURLbyIP();

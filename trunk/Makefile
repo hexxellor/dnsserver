@@ -2,25 +2,28 @@
 
 #CC := g++
 #CFLAGS := -O2
-OBJECTS := dnssocket.o dnspacketizator.o dnsresolver.o dnsmain.o
+OBJECTS := dnssocket.o dnspacketizator.o dnsresolver.o dnsdatabasereader.o dnsmain.o
 
 .PHONY : clean
 
 dnsserver : $(OBJECTS)
-	g++ $(OBJECTS) -o dnsserver
+	$(CXX) $(OBJECTS) -o dnsserver
 
 dnsmain.o : dnsmain.cpp
-	g++ -c -I. dnsmain.cpp -o dnsmain.o
+	$(CXX) -c -I. dnsmain.cpp -o dnsmain.o
+
+dnsdatabasereader.o : dnsdatabasereader.cpp dnsdatabasereader.h
+	$(CXX) -c -I. dnsdatabasereader.cpp -o dnsdatabasereader.o
 
 dnsresolver.o : dnsresolver.cpp dnsresolver.h
-	g++ -c -I. dnsresolver.cpp -o dnsresolver.o
+	$(CXX) -c -I. dnsresolver.cpp -o dnsresolver.o
 
 dnspacketizator.o : dnspacketizator.cpp dnspacketizator.h
-	g++ -c -I. dnspacketizator.cpp -o dnspacketizator.o 
+	$(CXX) -c -I. dnspacketizator.cpp -o dnspacketizator.o 
 
 dnssocket.o : dnssocket.cpp dnssocket.h
-	g++ -c -I. dnssocket.cpp -o dnssocket.o
+	$(CXX) -c -I. dnssocket.cpp -o dnssocket.o
 
 clean:
-	rm -f *.o
+	rm -f *.o dnsserver
 
