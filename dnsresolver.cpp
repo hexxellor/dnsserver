@@ -39,16 +39,18 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
 
     //SEARCHDATABASE atomicQuery.Name;!!
 
+    printf("Name: %s, length %i",  atomicQuery.Name, strlen(atomicQuery.Name));
+
     searchResponse = dnsDataBaseReader->searchIPbyURL( atomicQuery.Name );
 
     if (searchResponse > 0 )
     {
-      responseLength = responseLength + addResponseRecord(bufferRRs, (char *)dnsDataBaseReader->getFoundIP().c_str());
+      responseLength = responseLength + addResponseRecord(bufferRRs, dnsDataBaseReader->getFoundIP());
       printf("%s : %i\n responseLength %i\n", __FUNCTION__, __LINE__, responseLength);
     }
     else
     {
-       //Not found in data base!
+       //URL not found in data base
        return -1;
     }
 
