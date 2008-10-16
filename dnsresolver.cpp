@@ -37,10 +37,6 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   {
     readQueryRequest(queriesPointer, &atomicQuery);
 
-    //SEARCHDATABASE atomicQuery.Name;!!
-
-    printf("Name: %s, length %i",  atomicQuery.Name, strlen(atomicQuery.Name));
-
     searchResponse = dnsDataBaseReader->searchIPbyURL( atomicQuery.Name );
 
     if (searchResponse > 0 )
@@ -105,7 +101,7 @@ int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace, char *resolvedI
     printf("Dir IP no valida\n");
   }
 
-  responseRecord->rRDATA = ntohl((uint32_t)intAddress.s_addr);
+  responseRecord->rRDATA = (uint32_t)intAddress.s_addr;
 
   //memcpy(rrBufferPlace, dnsRecords, sizeof(dnsRecords));
 
