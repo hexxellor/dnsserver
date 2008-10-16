@@ -5,7 +5,9 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
+#include <defs.h>
+
+//using namespace std;
 
 #define HOSTS_FILE "./hosts"
 #define FORBIDDEN_CHARS "\t "
@@ -32,8 +34,15 @@ class DNSDataBaseReader
      */
     int searchIPbyURL(char *askedURL);
 
+    /*
+     * @brief Function to search in /etc/hosts
+     */
     char *getFoundIP();
-    //searchURLbyIP();
+
+    /*
+     * @brief Function to search in /etc/hosts
+     */
+    char *getRealName();
 
   private:
 
@@ -45,6 +54,8 @@ class DNSDataBaseReader
     string line;
 
     char resolvedIP[16];
+
+    char realName[255];
 
 };
 

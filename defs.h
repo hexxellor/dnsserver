@@ -21,11 +21,12 @@ struct dnsQuery
   char Name[255];
   uint16_t rrType;
   uint16_t rrClass;
+  unsigned int tagPointer;
 };
 
-//For struct alignment
+//For struct packing
 #pragma pack (2)
-struct dnsRecords
+struct dnsRDataRecord
 {
   uint16_t rName;
   uint16_t rType;
@@ -35,11 +36,16 @@ struct dnsRecords
   uint32_t rRDATA;
 };
 
-struct dnsPkt
+//For struct packing
+#pragma pack (2)
+struct dnsCNameRecord
 {
-  struct dnsHeader header;
-  struct dnsQuery *queries;
-  struct dnsRecords *rrs;
+  uint16_t rName;
+  uint16_t rType;
+  uint16_t rClass;
+  uint32_t rTTL;
+  uint16_t rdLength;
+  //RDATA will be copied to buffer in running time
 };
 
 //DNS Header error codes
@@ -54,25 +60,28 @@ enum RCODE
 };
 
 //RR request types
-enum RR_TYPE
-{
-  A_TYPE = 1,
-  NS_TYPE = 2,
-  MD_TYPE = 3,
-  MF_TYPE = 4,
-  CNAME_TYPE = 5,
-  SOA_TYPE = 6,
-  MB_TYPE = 7,
-  MG_TYPE = 8,
-  MR_TYPE = 9,
-  NULL_TYPE = 10,
-  WKS_TYPE = 11,
-  PTR_TYPE = 12,
-  HINFO_TYPE = 13,
-  MINFO_TYPE = 14,
-  MX_TYPE = 15,
-  TXT_TYPE = 16
-};
+//enum RR_TYPE
+//{
+//  A_TYPE = 1,
+//  NS_TYPE = 2,
+//  MD_TYPE = 3,
+//  MF_TYPE = 4,
+//  CNAME_TYPE = 5,
+//  SOA_TYPE = 6,
+//  MB_TYPE = 7,
+//  MG_TYPE = 8,
+//  MR_TYPE = 9,
+//  NULL_TYPE = 10,
+//  WKS_TYPE = 11,
+//  PTR_TYPE = 12,
+//  HINFO_TYPE = 13,
+//  MINFO_TYPE = 14,
+//  MX_TYPE = 15,
+//  TXT_TYPE = 16
+//};
+
+#define A_TYPE 1
+#define CNAME_TYPE 5
 
 //Queries classes
 enum QCLASS
@@ -84,7 +93,7 @@ enum QCLASS
 };
 
 #define NAME_NOT_FOUND -1
-#define NAME_IS_URL 0
-#define NAME_IS_ALIAS 1
+#define NAME_IS_AN_URL 1
+#define NAME_IS_AN_ALIAS 2
 
 #endif /* DEFS_H */
