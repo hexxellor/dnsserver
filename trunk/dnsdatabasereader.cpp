@@ -2,9 +2,9 @@
 
 DNSDataBaseReader::DNSDataBaseReader()
 {
-  //Apertura del fichero. 
-  //COMPROBAR SI EXISTE PRIMERO!!
+  //File opening
   ifsHosts.open(HOSTS_FILE);
+  strcpy(resolvedIP, "Not found!");
 }
 
 DNSDataBaseReader::~DNSDataBaseReader()
@@ -12,18 +12,20 @@ DNSDataBaseReader::~DNSDataBaseReader()
   ifsHosts.close();
 }
 
-string DNSDataBaseReader::getFoundIP()
+char *DNSDataBaseReader::getFoundIP()
 {
-  return(resolvedIP);
+  return (resolvedIP);
 }
 
 //Search the name in local database. Returns:
-//1 - 
-
-
+// 1 if the found URL is an URL 
+// 2 if the found URL is an alias
+// -1 if URL is not found
 int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 {
   
+  printf("%s: Buscando %s\n", __FUNCTION__, askedURL);
+
   size_t beginComment, beginHostIP, endHostIP, beginHostName, endHostName, beginHostAlias, endHostAlias;
   string HostIP, HostName, HostAlias;
 
@@ -36,7 +38,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
     {
       if ((beginComment = line.find('#')) != string::npos)
       {
-        //Recortamos todo lo que hay por detras de #
+        //Erase everything after '#' in the line
         line.erase(beginComment, line.length() - beginComment);
       }
 
@@ -51,9 +53,15 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
            endHostName = line.find_first_of(FORBIDDEN_CHARS, beginHostName);
            HostName = line.substr(beginHostName, endHostName - beginHostName);
            //The found name is an URL => return 1
+            
+           cout << " comparando " << HostName << endl;
+
            if (HostName.compare(askedURL) == 0)
            {
-             resolvedIP = HostIP;
+
+             cout << "Encontrada ip: " << HostIP << endl;
+             strcpy(resolvedIP, HostIP.c_str());
+             cout << "Encontrada ip: " << resolvedIP << endl;
              return (1);
            }
          }
@@ -65,7 +73,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
            //The found name is an alias => return 2
            if (HostName.compare(askedURL) == 0)
            {
-             resolvedIP = HostIP;
+             strcpy(resolvedIP, HostIP.c_str());
              return (2);
            }
 
@@ -73,8 +81,8 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 
       }
     }
-  //Not found UURL => return -1
-  printf("Not found!\n");
+  //Not found URL => return -1
+  printf("Asked URL not found!\n");
   return (-1);
   }
 

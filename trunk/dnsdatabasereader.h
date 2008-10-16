@@ -32,7 +32,7 @@ class DNSDataBaseReader
      */
     int searchIPbyURL(char *askedURL);
 
-    string getFoundIP();
+    char *getFoundIP();
     //searchURLbyIP();
 
   private:
@@ -44,7 +44,7 @@ class DNSDataBaseReader
 
     string line;
 
-    string resolvedIP;
+    char resolvedIP[16];
 
 };
 
