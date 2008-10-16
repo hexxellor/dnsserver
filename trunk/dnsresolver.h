@@ -33,8 +33,6 @@ class DNSResolver
      */
     int resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQueries);
 
-    //void setQueryBufferBegin(unsigned char *bufferQueries);
-
     /*
      * @brief Returns the number of answer RRs added
      * @return Number of RRs added to response
@@ -55,9 +53,19 @@ class DNSResolver
     DNSDataBaseReader *dnsDataBaseReader;
 
     /*
+     * @brief Add RDATA record to response packet
+     */
+    int addRDATARecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
+
+    /*
      * @brief Add response record to response packet
      */
-    int addResponseRecord(unsigned char *rrBufferPlace, char *resolvedIP);
+    int addCNAMERecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
+
+    /*
+     * @brief Add response record to response packet
+     */
+    unsigned int writeNamefromURL(char *URL, char *destinationBuffer);
 };
 
 #endif /* DNSRESOLVER_H */

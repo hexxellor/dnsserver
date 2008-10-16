@@ -20,16 +20,11 @@ DNSResolver::~DNSResolver()
 
 }
 
-//void DNSResolver::setQueryBufferBegin(unsigned char *bufferQueries)
-//{
-//  queriesPointer = bufferQueries;
-//}
-
 int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQueries)
 {
   dnsQuery atomicQuery;
   int responseLength = 0;
-  int searchResponse = 0;
+  //int searchResponse = 0;
 
   newRRsNumber = 0;
 
@@ -37,21 +32,26 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   {
     readQueryRequest(queriesPointer, &atomicQuery);
 
-    searchResponse = dnsDataBaseReader->searchIPbyURL( atomicQuery.Name );
-
-    if (searchResponse > 0 )
+    //searchResponse = dnsDataBaseReader->searchIPbyURL( atomicQuery.Name );
+    switch (dnsDataBaseReader->searchIPbyURL( atomicQuery.Name ))
     {
-      responseLength = responseLength + addResponseRecord(bufferRRs, dnsDataBaseReader->getFoundIP());
-      printf("%s : %i\n responseLength %i\n", __FUNCTION__, __LINE__, responseLength);
-    }
-    else
-    {
-       //URL not found in data base
-       return -1;
-    }
-
-  }
-
+      case NAME_IS_AN_URL:
+      {
+        responseLength = responseLength + addRDATARecordResponse(bufferRRs, &atomicQuery);
+        break;
+      }
+      case NAME_IS_AN_ALIAS:
+      {
+        responseLength = responseLength + addCNAMERecordResponse(bufferRRs, &atomicQuery);
+        responseLength = responseLength + addRDATARecordResponse(bufferRRs, &atomicQuery);
+        break;
+      }
+      default:
+      {
+        return NAME_NOT_FOUND;      
+      }
+    }  //switch
+  }  //for
   return responseLength;
 }
 
@@ -74,20 +74,19 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
   query->rrType = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+1]);
   query->rrClass = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+3]);
 
-  //Return length of the query ?!?!?!?!?!?!?
   return (nameCounter + 4);
 }
 
-int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace, char *resolvedIP)
+//Add RDATA record
+int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *resolvedIP)
 {
-
   int lengthRecord;
 
   in_addr intAddress;
-  dnsRecords *responseRecord = (dnsRecords *)rrBufferPlace;
+  dnsRDataRecord *responseRecord = (dnsRDataRecord *)rrBufferPlace;
 
-  responseRecord->rName = htons((uint16_t)0xc00c);
-  responseRecord->rType = htons((uint16_t)0x0001);
+  responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + 12));
+  responseRecord->rType = htons((uint16_t) A_TYPE);
   responseRecord->rClass = htons((uint16_t)0x0001);
 
   responseRecord->rTTL = (int32_t)ntohl((int32_t)0x00000000);
@@ -107,9 +106,54 @@ int DNSResolver::addResponseRecord(unsigned char *rrBufferPlace, char *resolvedI
 
   newRRsNumber++;
 
-  printf("%s : %i, sizeof %i\n", __FUNCTION__, __LINE__, sizeof(dnsRecords));
+  return (sizeof(dnsRDataRecord));
+}
 
-  return (sizeof(dnsRecords));
+//Add CNAME record
+int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace)
+{
+  unsigned int lengthRecord = 0;
+
+  in_addr intAddress;
+  dnsCNameRecord *responseRecord = (dnsCNameRecord *)rrBufferPlace;
+
+  responseRecord->rName = htons((uint16_t) 0xc00c);
+  responseRecord->rType = htons((uint16_t) CNAME_TYPE);
+  responseRecord->rClass = htons((uint16_t) 0x0001);
+
+  responseRecord->rTTL = (int32_t)ntohl((int32_t)0x00000000);
+
+  lengthRecord = writeNamefromURL(dnsDataBaseReader->getRealName(), &rrBufferPlace[sizeof(dnsCNameRecord)]);
+
+  responseRecord->rdLength = ntohs((uint16_t)lengthRecord);
+
+  return (sizeof(dnsCNameRecord) + lengthRecord);
+}
+
+unsigned int DNSResolver::writeNamefromURL(char *URL, char *destinationBuffer)
+{
+
+  char *nextDot , *prevDot = URL;
+  int numBytes = 1;
+  
+  nextDot = strchr(URL,'.');
+  destinationBuffer[0] = abs(nextDot - prevStep);
+  while (nextDot != NULL)
+  {
+    strncpy(&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+    numBytes = numBytes + abs(prevDot - nextDot);
+    prevDot = nextDot + 1;
+    nextDot = strchr(URL,'.');
+    destinationBuffer[numBytes] = abs(nextDot - prevStep);
+    numBytes++;
+  }
+
+  //Copy of the name last tag
+  nextDot = strchr(prevDot,'\0');
+  strncpy(&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+  numBytes = numBytes + abs(prevDot - nextDot);
+  destinationBuffer[numBytes] = '\0';
+  return (numBytes +1);
 }
 
 int DNSResolver::getResponseAnRRsNumber()

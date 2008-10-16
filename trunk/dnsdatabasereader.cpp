@@ -14,7 +14,12 @@ DNSDataBaseReader::~DNSDataBaseReader()
 
 char *DNSDataBaseReader::getFoundIP()
 {
-  return (resolvedIP);
+  return resolvedIP;
+}
+
+char *DNSDataBaseReader::getRealName()
+{
+  return realName;
 }
 
 //Search the name in local database. Returns:
@@ -54,12 +59,13 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
        {
          endHostName = line.find_first_of(FORBIDDEN_CHARS, beginHostName);
          HostName = line.substr(beginHostName, endHostName - beginHostName);
+         strcpy(realName, HostName.c_str()); 
          //The found name is an URL => return 1            
          cout << " comparando " << HostName << endl;
          if (HostName.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());       
-           return (1);
+           return NAME_IS_AN_URL;
          }
        }
 
@@ -71,7 +77,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
          if (HostName.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());
-           return (2);
+           return NAME_IS_AN_ALIAS;
          }
        }
     }
@@ -79,6 +85,6 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 
   //Not found URL => return -1
   cout << "Asked URL " << askedURL << " not found!" << endl;
-  return (-1);  
+  return NAME_NOT_FOUND;  
 }
 

@@ -130,6 +130,7 @@ uint16_t DNSPacketizator::generateResponseHeaderFlags()
   uint16_t headerFlags = 0x8180;
   //To set the error condition in server
   headerFlags = headerFlags + dnsError;
+
 }
 
 unsigned char *DNSPacketizator::getDnsResponse()
