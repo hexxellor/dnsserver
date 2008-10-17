@@ -110,19 +110,20 @@ void DNSPacketizator::generateDnsResponseHeader(unsigned char *msgPointer)
 {
   //Cast to header struct
   dnsHeader *responseHeader = (dnsHeader *)msgPointer;
-
   responseHeader->idDnsQuery = htons((uint16_t)idDnsQuery);
 
   //Write header flags  
   responseHeader->headerFlags = htons(generateResponseHeaderFlags());
-
   responseHeader->qdCount = htons((uint16_t)qdCount);
 
-  addNewRRstoCounters();
+  if ( dnsError == NO_ERROR )
+  {
+    addNewRRstoCounters();
 
-  responseHeader->anCount = htons((uint16_t)anCount);
-  responseHeader->nsCount = htons((uint16_t)nsCount);
-  responseHeader->arCount = htons((uint16_t)arCount);
+    responseHeader->anCount = htons((uint16_t)anCount);
+    responseHeader->nsCount = htons((uint16_t)nsCount);
+    responseHeader->arCount = htons((uint16_t)arCount);
+  }
 }
 
 void DNSPacketizator::addNewRRstoCounters()
@@ -147,6 +148,8 @@ uint16_t DNSPacketizator::generateResponseHeaderFlags()
   uint16_t headerFlags = 0x8180;
   //To set the error condition in server
   headerFlags = headerFlags + dnsError;
+
+  return headerFlags;
 
 }
 
