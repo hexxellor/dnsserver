@@ -30,8 +30,12 @@ class DNSResolver
    
     /*
      * @brief Pointer to the search class in data base
+     * @param bufferRRs Number of RRs added to response
+     * @param nQueries Place where the name must be wroten
+     * @param queryLength Place where the name must be wroten
+     * @return Number bytes wroten to destinationBuffer
      */
-    int resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQueries);
+    int resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQueries, unsigned int queryLength);
 
     /*
      * @brief Returns the number of answer RRs added
@@ -45,25 +49,41 @@ class DNSResolver
 
     int newRRsNumber;
 
-    int readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query);
-
     /*
      * @brief Pointer to data base reader class
      */
     DNSDataBaseReader *dnsDataBaseReader;
 
     /*
+     * @brief Read and process queries in request; generate the RRs response
+     * @param URL Number of RRs added to response
+     * @param destinationBuffer Place where the name must be wroten
+     * @param destinationBuffer Place where the name must be wroten
+     * @return Number bytes wroten to destinationBuffer
+     */
+    int readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query, unsigned int tPointer);
+
+    /*
      * @brief Add RDATA record to response packet
+     * @param URL Number of RRs added to response
+     * @param destinationBuffer Place where the name must be wroten
+     * @return Number bytes wroten to destinationBuffer
      */
     int addRDATARecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
 
     /*
-     * @brief Add response record to response packet
+     * @brief Add CNAME record to response packet
+     * @param URL Number of RRs added to response
+     * @param destinationBuffer Place where the name must be wroten
+     * @return Number bytes wroten to destinationBuffer
      */
     int addCNAMERecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
 
     /*
      * @brief Add response record to response packet
+     * @param URL Number of RRs added to response
+     * @param destinationBuffer Place where the name must be wroten
+     * @return Number bytes wroten to destinationBuffer
      */
     unsigned int writeNamefromURL(char *URL, char *destinationBuffer);
 };

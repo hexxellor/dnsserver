@@ -25,12 +25,14 @@ DNSPacketizator::~DNSPacketizator()
 
 void DNSPacketizator::processDnsQuery(int dnsPktLength)
 {
+
+  unsigned int dnsResponseRRsLength = 0;
+
   //Set the error state to NO ERROR
   dnsError = NO_ERROR;
   dnsRequestLength = dnsPktLength;
-  dnsResponseLength = dnsRequestLength;
 
-  unsigned int dnsResponseRRsLength = 0;
+  dnsResponseLength = dnsRequestLength;
 
   //First intialize answer packet
   initializeDnsQueryResponse();
@@ -40,22 +42,32 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
 
   if (dnsError == NO_ERROR)
   {
-
-    if ( (dnsResponseRRsLength = dnsResolver->resolveQueryRequest(dnsQueryRRsPointer, qdCount)) == -1 )
+    switch (dnsResponseRRsLength = dnsResolver->resolveQueryRequest(dnsQueryRRsPointer, qdCount, dnsRequestLength))
     {
-       // URL/Alias not found!
-       dnsError = NAME_ERROR;
-    }
-    else
-    {
-      dnsResponseLength = dnsResponseLength + dnsResponseRRsLength;
-    }
+      case NAME_NOT_FOUND:
+      {
+        dnsError = NAME_ERROR;   
+        break;
+      }
+      case MALFORMED_QUERY:
+      {
+        dnsError = FORMAT_ERROR;
+        break;
+      }
+//      case UNSUPPORTED_OPTION:
+//      {
+//        dnsError = NOT_IMPLEMENTED;
+//        break;
+//      }
+      default:
+      {
+        dnsResponseLength = dnsResponseLength + dnsResponseRRsLength;
+      }
+    }  //switch
 
   }
 
   generateDnsResponseHeader(dnsQueryResponse);
-
-  printf("%s : %i\n", __FUNCTION__, __LINE__);
 
 }
 
@@ -75,6 +87,11 @@ void DNSPacketizator::processDnsHeader(unsigned char *msgPointer)
   anCount = ntohs(headerPointer->anCount);
   nsCount = ntohs(headerPointer->nsCount);
   arCount = ntohs(headerPointer->arCount);
+
+  if((anCount != 0)||(nsCount != 0)||(arCount != 0))
+  {
+    dnsError = FORMAT_ERROR;
+  }
 
 }
 
@@ -100,8 +117,6 @@ void DNSPacketizator::generateDnsResponseHeader(unsigned char *msgPointer)
   responseHeader->qdCount = htons((uint16_t)qdCount);
 
   addNewRRstoCounters();
-
-  printf("Nuevos valores: \n anCount: %i\n", anCount);
 
   responseHeader->anCount = htons((uint16_t)anCount);
   responseHeader->nsCount = htons((uint16_t)nsCount);
@@ -140,9 +155,6 @@ unsigned char *DNSPacketizator::getDnsResponse()
 
 int DNSPacketizator::getDnsResponseLength()
 {
-
-  printf("%s : %i, dnsResponseLength %i\n", __FUNCTION__, __LINE__, dnsResponseLength);
-
   return dnsResponseLength;
 }
 

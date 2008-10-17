@@ -92,6 +92,7 @@ enum QCLASS
   HS_CLASS = 4
 };
 
+#define MALFORMED_QUERY -2
 #define NAME_NOT_FOUND -1
 #define NAME_IS_AN_URL 1
 #define NAME_IS_AN_ALIAS 2
