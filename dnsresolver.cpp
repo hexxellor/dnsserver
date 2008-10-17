@@ -57,16 +57,13 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         //Add a CNAME record
         bytesResponse = addCNAMERecordResponse(actualRR, dnsDataBaseReader->getRealName(), atomicQuery.tagPointer);
 
-        printf ("%s:%s  %i, bytesResponse %i\n", __FILE__, __FUNCTION__, __LINE__, bytesResponse);
-
-        //Actualize the tag pointer to an actual value for RDATA
+        //Actualize some values to add an RDATA record
         atomicQuery.tagPointer = abs(actualRR - bufferRRs) + queryLength + 12;
-
         responseLength = responseLength + bytesResponse;
         actualRR = actualRR + bytesResponse;
         newRRsNumber++;
   
-        //Add a RDATA record
+        //Add the RDATA record
         bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
         break;
       }

@@ -51,7 +51,6 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
       }
       case MALFORMED_QUERY:
       {
-        printf("%s : %i\n", __FUNCTION__, __LINE__);
         dnsError = FORMAT_ERROR;
         break;
       }
@@ -123,6 +122,12 @@ void DNSPacketizator::generateDnsResponseHeader(unsigned char *msgPointer)
     responseHeader->anCount = htons((uint16_t)anCount);
     responseHeader->nsCount = htons((uint16_t)nsCount);
     responseHeader->arCount = htons((uint16_t)arCount);
+  }
+  else
+  {
+    responseHeader->anCount = 0;
+    responseHeader->nsCount = 0;
+    responseHeader->arCount = 0;
   }
 }
 
