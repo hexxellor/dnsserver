@@ -12,8 +12,6 @@ DNSServerSocket::DNSServerSocket(int dnsPort)
   memset(receivedData, 0, DNS_PKT_SIZE);
   createSocket(dnsPort);
   dnsPacketizator = new DNSPacketizator(receivedData);
-
-//  dnsPacketizator->setQueryRequestBuffer(receivedData);
 }
 
 DNSServerSocket::~DNSServerSocket()
@@ -24,7 +22,6 @@ DNSServerSocket::~DNSServerSocket()
     close(dnsServerSocket);
   }
 
-  //¿TERMINATE THREADS?
 }
 
 void DNSServerSocket::createSocket(int serverPort)
@@ -48,19 +45,11 @@ void DNSServerSocket::createSocket(int serverPort)
     //throw SomeException;
   }
 
-//  if (listen(dnsServerSocket, NUM_MAX_CLIENTES) == -1)
-//  {
-//    printf("Error haciendo listen\n");
-//    //throw SomeException
-//  }
 }
 
 void DNSServerSocket::listenSocket()
 {
-
   //Creation of the class for searching the data base
-  //DNSDataBaseReader dnsDBR;
-
   int clientInetAddrSize = sizeof(dnsClientInetAddr);
 
   //Infinite loop to receive incoming packets
@@ -74,8 +63,6 @@ void DNSServerSocket::listenSocket()
     else
     {
 
-      //printf("Recibidos %i: 0x%x\n", bytesRecibidos, receivedData);
-
       dnsPacketizator->processDnsQuery(bytesRecibidos);
 
       if ( sendto(dnsServerSocket, dnsPacketizator->getDnsResponse(), dnsPacketizator->getDnsResponseLength(), 0, \
@@ -87,9 +74,6 @@ void DNSServerSocket::listenSocket()
       {
         printf("Paquete enviado correctamente\n");
       }
-
-      //Launch every client on his own thread ¿?
-      //pthread_create();
 
     }
   }
