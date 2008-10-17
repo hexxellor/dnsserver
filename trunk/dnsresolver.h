@@ -12,7 +12,7 @@ extern "C"
 
 #include <string>
 
-#define COMPRESSED_MASK 0xc000;
+#define COMPRESSED_MASK 0xc000
 
 /*
  * @class DNSResolver
@@ -69,7 +69,7 @@ class DNSResolver
      * @param destinationBuffer Place where the name must be wroten
      * @return Number bytes wroten to destinationBuffer
      */
-    int addRDATARecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
+    int addRDATARecordResponse(unsigned char *rrBufferPlace, char *resolvedIP, unsigned int tagPointer);
 
     /*
      * @brief Add CNAME record to response packet
@@ -77,7 +77,7 @@ class DNSResolver
      * @param destinationBuffer Place where the name must be wroten
      * @return Number bytes wroten to destinationBuffer
      */
-    int addCNAMERecordResponse(unsigned char *rrBufferPlace, char *resolvedIP);
+    int addCNAMERecordResponse(unsigned char *rrBufferPlace, char *realName, unsigned int tagPointer);
 
     /*
      * @brief Add response record to response packet
@@ -85,7 +85,7 @@ class DNSResolver
      * @param destinationBuffer Place where the name must be wroten
      * @return Number bytes wroten to destinationBuffer
      */
-    unsigned int writeNamefromURL(char *URL, char *destinationBuffer);
+    unsigned int writeNamefromURL(char *URL, unsigned char *destinationBuffer);
 };
 
 #endif /* DNSRESOLVER_H */
