@@ -4,7 +4,8 @@ DNSDataBaseReader::DNSDataBaseReader()
 {
   //File opening
   ifsHosts.open(HOSTS_FILE);
-  strcpy(resolvedIP, "Not found!");
+  strcpy(resolvedIP, "No IP");
+  strcpy(realName, "No name");
 }
 
 DNSDataBaseReader::~DNSDataBaseReader()
@@ -59,9 +60,10 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
        {
          endHostName = line.find_first_of(FORBIDDEN_CHARS, beginHostName);
          HostName = line.substr(beginHostName, endHostName - beginHostName);
-         strcpy(realName, HostName.c_str()); 
+
+//         strcpy(realName, HostName.c_str()); 
+
          //The found name is an URL => return 1            
-         cout << " comparando " << HostName << endl;
          if (HostName.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());       
@@ -74,11 +76,14 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
          endHostAlias = line.find_first_of(FORBIDDEN_CHARS, beginHostAlias);
          HostAlias = line.substr(beginHostAlias, endHostAlias - beginHostAlias);         
          //The found name is an alias => return 2
-         if (HostName.compare(askedURL) == 0)
+         if (HostAlias.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());
+           strcpy(realName, HostName.c_str());
+           cout << " name is an alias for " << HostName << endl;
            return NAME_IS_AN_ALIAS;
          }
+
        }
     }
   }

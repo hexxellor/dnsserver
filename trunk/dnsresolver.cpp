@@ -56,11 +56,18 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
       {
         //Add a CNAME record
         bytesResponse = addCNAMERecordResponse(actualRR, dnsDataBaseReader->getRealName(), atomicQuery.tagPointer);
+
+        printf ("%s:%s  %i, bytesResponse %i\n", __FILE__, __FUNCTION__, __LINE__, bytesResponse);
+
         //Actualize the tag pointer to an actual value for RDATA
         atomicQuery.tagPointer = abs(actualRR - bufferRRs) + queryLength + 12;
+
+        responseLength = responseLength + bytesResponse;
         actualRR = actualRR + bytesResponse;
+        newRRsNumber++;
+  
         //Add a RDATA record
-        bytesResponse = addRDATARecordResponse(bufferRRs, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
+        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
         break;
       }
       default:
@@ -69,9 +76,9 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
       }
     }  //switch
 
-    newRRsNumber++;
     responseLength = responseLength + bytesResponse;
     actualRR = actualRR + bytesResponse;
+    newRRsNumber++;
 
   }  //for
 
@@ -148,35 +155,44 @@ int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *real
   in_addr intAddress;
   dnsCNameRecord *responseRecord = (dnsCNameRecord *)rrBufferPlace;
 
+  printf ("Sumando ptro %i\n", tagPointer);
+
   responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + tagPointer));
+
   responseRecord->rType = htons((uint16_t) CNAME_TYPE);
   responseRecord->rClass = htons((uint16_t) 0x0001);
 
   responseRecord->rTTL = (int32_t)ntohl((int32_t)0x00000000);
 
-  lengthRecord = writeNamefromURL(realName, &rrBufferPlace[sizeof(dnsCNameRecord)]);
+  lengthRecord = writeNamefromURL(realName, (rrBufferPlace + sizeof(dnsCNameRecord)));
+//  printf ("%s:%s  %i, size: %i\n", __FILE__, __FUNCTION__, __LINE__,  sizeof(dnsCNameRecord));
+
+  printf("Copiado %s, length calculada %i\n", realName, lengthRecord);
 
   responseRecord->rdLength = ntohs((uint16_t)lengthRecord);
 
   //We prepare the pointer for the RDATA response
-  tagPointer = 12 + abs(&rrBufferPlace[sizeof(dnsCNameRecord)] - rrBufferPlace);
+//  tagPointer = 12 + abs(&rrBufferPlace[sizeof(dnsCNameRecord)] - rrBufferPlace);
 
   return (sizeof(dnsCNameRecord) + lengthRecord);
+
 }
 
 unsigned int DNSResolver::writeNamefromURL(char *URL, unsigned char *destinationBuffer)
 {
   char *nextDot , *prevDot = URL;
   int numBytes = 1;
-  
+
   nextDot = strchr(URL,'.');
+
   destinationBuffer[0] = abs(nextDot - prevDot);
+
   while (nextDot != NULL)
   {
     strncpy((char *)&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
     numBytes = numBytes + abs(prevDot - nextDot);
     prevDot = nextDot + 1;
-    nextDot = strchr(URL,'.');
+    nextDot = strchr(prevDot,'.');
     destinationBuffer[numBytes] = abs(nextDot - prevDot);
     numBytes++;
   }
@@ -184,9 +200,11 @@ unsigned int DNSResolver::writeNamefromURL(char *URL, unsigned char *destination
   //Copy of the name last tag
   nextDot = strchr(prevDot,'\0');
   strncpy((char *)&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+  destinationBuffer[numBytes - 1] = abs(nextDot - prevDot);
   numBytes = numBytes + abs(prevDot - nextDot);
   destinationBuffer[numBytes] = '\0';
-  return (numBytes +1);
+
+  return (numBytes + 1);
 }
 
 int DNSResolver::getResponseAnRRsNumber()
