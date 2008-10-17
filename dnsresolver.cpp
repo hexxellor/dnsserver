@@ -27,8 +27,8 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   int bytesRequest = 0;
   int bytesResponse = 0;
 
-  char *actualRR = bufferRRs;
-  unsigned char* actualQuery = queriesPointer;
+  unsigned char *actualRR = bufferRRs;
+  unsigned char *actualQuery = queriesPointer;
 
   newRRsNumber = 0;
 
@@ -129,14 +129,14 @@ int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *reso
 }
 
 //Add CNAME record
-int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *realName, unsigned int *tagPointer)
+int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *realName, unsigned int tagPointer)
 {
   unsigned int lengthRecord = 0;
 
   in_addr intAddress;
   dnsCNameRecord *responseRecord = (dnsCNameRecord *)rrBufferPlace;
 
-  responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + (*tagPointer)));
+  responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + tagPointer));
   responseRecord->rType = htons((uint16_t) CNAME_TYPE);
   responseRecord->rClass = htons((uint16_t) 0x0001);
 
@@ -147,31 +147,31 @@ int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *real
   responseRecord->rdLength = ntohs((uint16_t)lengthRecord);
 
   //We prepare the pointer for the RDATA response
-  (*tagPointer) = 12 + abs(&rrBufferPlace[sizeof(dnsCNameRecord)] - rrBufferPlace);
+  tagPointer = 12 + abs(&rrBufferPlace[sizeof(dnsCNameRecord)] - rrBufferPlace);
 
   return (sizeof(dnsCNameRecord) + lengthRecord);
 }
 
-unsigned int DNSResolver::writeNamefromURL(char *URL, char *destinationBuffer)
+unsigned int DNSResolver::writeNamefromURL(char *URL, unsigned char *destinationBuffer)
 {
   char *nextDot , *prevDot = URL;
   int numBytes = 1;
   
   nextDot = strchr(URL,'.');
-  destinationBuffer[0] = abs(nextDot - prevStep);
+  destinationBuffer[0] = abs(nextDot - prevDot);
   while (nextDot != NULL)
   {
-    strncpy(&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+    strncpy(&(char)destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
     numBytes = numBytes + abs(prevDot - nextDot);
     prevDot = nextDot + 1;
     nextDot = strchr(URL,'.');
-    destinationBuffer[numBytes] = abs(nextDot - prevStep);
+    destinationBuffer[numBytes] = abs(nextDot - prevDot);
     numBytes++;
   }
 
   //Copy of the name last tag
   nextDot = strchr(prevDot,'\0');
-  strncpy(&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+  strncpy(&(char)destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
   numBytes = numBytes + abs(prevDot - nextDot);
   destinationBuffer[numBytes] = '\0';
   return (numBytes +1);

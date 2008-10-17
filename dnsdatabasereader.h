@@ -7,7 +7,7 @@
 
 #include <defs.h>
 
-//using namespace std;
+using namespace std;
 
 #define HOSTS_FILE "./hosts"
 #define FORBIDDEN_CHARS "\t "
