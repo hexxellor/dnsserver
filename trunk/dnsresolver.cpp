@@ -35,6 +35,12 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   for (int i = 0; i < nQueries; i++)
   {
     bytesRequest = readQueryRequest(actualQuery, &atomicQuery, requestLength + 12);
+
+    if (bytesRequest == MALFORMED_QUERY)
+    {
+      return MALFORMED_QUERY;
+    }
+
     requestLength = requestLength + bytesRequest;
     actualQuery = actualQuery + bytesRequest;
 
@@ -43,7 +49,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
       case NAME_IS_AN_URL:
       {
         //Add a RDATA record
-        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);          
+        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
         break;
       }
       case NAME_IS_AN_ALIAS:
@@ -51,7 +57,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         //Add a CNAME record
         bytesResponse = addCNAMERecordResponse(actualRR, dnsDataBaseReader->getRealName(), atomicQuery.tagPointer);
         //Actualize the tag pointer to an actual value for RDATA
-        atomicQuery.tagPointer = abs(actualRR - queriesPointer) + 12;
+        atomicQuery.tagPointer = abs(actualRR - bufferRRs) + queryLength + 12;
         actualRR = actualRR + bytesResponse;
         //Add a RDATA record
         bytesResponse = addRDATARecordResponse(bufferRRs, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
@@ -69,7 +75,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
 
   }  //for
 
-  if (requestLength != queryLength)
+  if (requestLength != (queryLength - 12))
   {
     return MALFORMED_QUERY;
   }
@@ -81,14 +87,18 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
 {
   int nameCounter;
 
-  uint8_t queryLength = (uint8_t)queryBufferPointer[0];
-
-  for (nameCounter = 0; queryLength != 0; nameCounter++)
+  uint8_t labelLength = (uint8_t)queryBufferPointer[0];
+  for (nameCounter = 0; labelLength != 0; nameCounter++)
   {
-    strncpy(&query->Name[nameCounter], (char *)&queryBufferPointer[nameCounter+1], queryLength);
-    nameCounter = nameCounter + queryLength;
-    queryLength = (uint8_t)queryBufferPointer[nameCounter + 1];
+    strncpy(&query->Name[nameCounter], (char *)&queryBufferPointer[nameCounter+1], labelLength);
+    nameCounter = nameCounter + labelLength;
+    labelLength = (uint8_t)queryBufferPointer[nameCounter + 1];
     query->Name[nameCounter] = '.';
+    //Maximum size for tags and FQDN (RFC1035)
+    if ((labelLength > 63)||(nameCounter > 255))
+    {
+      return MALFORMED_QUERY;
+    }
   }
 
   query->Name[nameCounter - 1] = '\0';
@@ -98,7 +108,9 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
 
   query->tagPointer = tPointer;
 
-  return (nameCounter + 4);
+  printf("%s, son %i bytes\n", query->Name, nameCounter + 5);
+
+  return (nameCounter + 5);
 }
 
 //Add RDATA record
@@ -161,7 +173,7 @@ unsigned int DNSResolver::writeNamefromURL(char *URL, unsigned char *destination
   destinationBuffer[0] = abs(nextDot - prevDot);
   while (nextDot != NULL)
   {
-    strncpy(&(char)destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+    strncpy((char *)&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
     numBytes = numBytes + abs(prevDot - nextDot);
     prevDot = nextDot + 1;
     nextDot = strchr(URL,'.');
@@ -171,7 +183,7 @@ unsigned int DNSResolver::writeNamefromURL(char *URL, unsigned char *destination
 
   //Copy of the name last tag
   nextDot = strchr(prevDot,'\0');
-  strncpy(&(char)destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
+  strncpy((char *)&destinationBuffer[numBytes], prevDot, abs(prevDot - nextDot));
   numBytes = numBytes + abs(prevDot - nextDot);
   destinationBuffer[numBytes] = '\0';
   return (numBytes +1);
