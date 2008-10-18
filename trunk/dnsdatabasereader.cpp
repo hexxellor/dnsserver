@@ -1,9 +1,9 @@
 #include <dnsdatabasereader.h>
 
-DNSDataBaseReader::DNSDataBaseReader()
+DNSDataBaseReader::DNSDataBaseReader(char *hostFile)
 {
   //File opening
-  ifsHosts.open(HOSTS_FILE);
+  ifsHosts.open(hostFile);
   strcpy(resolvedIP, "No IP");
   strcpy(realName, "No name");
 }

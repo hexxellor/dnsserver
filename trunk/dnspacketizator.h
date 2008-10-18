@@ -24,14 +24,20 @@ class DNSPacketizator
 
     /*
      * @brief Parameter constructor.
-     * @param msg Pointer to the DNS request message.
+     * @param dnsResolverObject Pointer to dnsResolver object in memory.
      */
-    DNSPacketizator(unsigned char *msg);
+    DNSPacketizator(DNSResolver *dnsResolverObject);
 
     /*
      * @brief Default destructor
      */
     ~DNSPacketizator();
+
+    /*
+     * @brief Initializator function of message pointer
+     * @param msg Pointer to received DNS request
+     */
+    void initializeBufferPointer(unsigned char *msg);
 
     /*
      * @brief Read a DNS query and set the object variables
@@ -76,7 +82,7 @@ class DNSPacketizator
     /*
      * @brief Pointer to rr zone in dns response buffer
      */
-    unsigned char *dnsQueryRRsPointer;
+    unsigned char *dnsQueryResponseRRsPointer;
 
     /*
      * @brief Header variables

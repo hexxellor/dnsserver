@@ -9,7 +9,6 @@
 
 using namespace std;
 
-#define HOSTS_FILE "./hosts"
 #define FORBIDDEN_CHARS "\t "
 #define NUMERIC_CHARS "1234567890"
 #define ALPHABETIC_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -25,7 +24,7 @@ class DNSDataBaseReader
     /*
      * @brief Default constructor.
      */
-    DNSDataBaseReader();
+    DNSDataBaseReader(char *hostFile);
 
     /*
      * @brief Default destructor.     

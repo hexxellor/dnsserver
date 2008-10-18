@@ -6,21 +6,23 @@ DNSPacketizator::DNSPacketizator()
   dnsError = NO_ERROR;
 }
 
-DNSPacketizator::DNSPacketizator(unsigned char *msg)
+DNSPacketizator::DNSPacketizator(DNSResolver *dnsResolverObject)
 {
   idDnsQuery = 0;
   dnsError = NO_ERROR;
 
-  dnsQueryRequest = msg;
-
-  dnsResolver = new DNSResolver(dnsQueryResponse + 12 );
-
-  //dnsResolver->setQueryBufferBegin(dnsQueryResponse + 12);
+  dnsResolver = dnsResolverObject;
+  dnsResolver->initializeQueryBufferBegin(dnsQueryResponse + 12);
 }
 
 DNSPacketizator::~DNSPacketizator()
 {
 
+}
+
+void DNSPacketizator::initializeBufferPointer(unsigned char *msg)
+{
+  dnsQueryRequest = msg;
 }
 
 void DNSPacketizator::processDnsQuery(int dnsPktLength)
@@ -31,7 +33,6 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
   //Set the error state to NO ERROR
   dnsError = NO_ERROR;
   dnsRequestLength = dnsPktLength;
-
   dnsResponseLength = dnsRequestLength;
 
   //First intialize answer packet
@@ -42,7 +43,7 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
 
   if (dnsError == NO_ERROR)
   {
-    switch (dnsResponseRRsLength = dnsResolver->resolveQueryRequest(dnsQueryRRsPointer, qdCount, dnsRequestLength))
+    switch (dnsResponseRRsLength = dnsResolver->resolveQueryRequest(dnsQueryResponseRRsPointer, qdCount, dnsRequestLength))
     {
       case NAME_NOT_FOUND:
       {
@@ -137,7 +138,7 @@ void DNSPacketizator::initializeDnsQueryResponse()
 {
   //Copy of query section from response to request.
   memcpy(&dnsQueryResponse[12], &dnsQueryRequest[12], (dnsRequestLength - 12));
-  dnsQueryRRsPointer = &dnsQueryResponse[dnsRequestLength];
+  dnsQueryResponseRRsPointer = &dnsQueryResponse[dnsRequestLength];
 }
 
 uint16_t DNSPacketizator::generateResponseHeaderFlags()
