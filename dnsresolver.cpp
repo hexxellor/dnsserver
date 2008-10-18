@@ -6,17 +6,21 @@ DNSResolver::DNSResolver()
   queriesPointer = NULL;
 }
 
-DNSResolver::DNSResolver(unsigned char *bufferQueries)
+DNSResolver::DNSResolver(DNSDataBaseReader *dnsDataBaseReaderObject)
 {
   newRRsNumber = 0;
-  queriesPointer = bufferQueries;
-  dnsDataBaseReader = new DNSDataBaseReader();
+  dnsDataBaseReader = dnsDataBaseReaderObject;
+  queriesPointer = NULL;
 }
-
 
 DNSResolver::~DNSResolver()
 {
 
+}
+
+void DNSResolver::initializeQueryBufferBegin(unsigned char *queriesBuffer)
+{
+  queriesPointer = queriesBuffer;
 }
 
 int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQueries, unsigned int queryLength)

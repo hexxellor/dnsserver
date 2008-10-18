@@ -29,15 +29,22 @@ class DNSResolver
 
     /*
      * @brief Parameter constructor.
-     * @param bufferQueries Pointer to the position of queries in dnsQueryResponse buffer.
+     * @param dnsDataBaseReaderObject Pointer to dnsDataBaseReader object in memory.
      */
-    DNSResolver(unsigned char *bufferQueries);
+    DNSResolver(DNSDataBaseReader *dnsDataBaseReaderObject);
 
     /*
      * @brief Default destructor.
      */
     ~DNSResolver();
    
+    /*
+     * @brief Initializator function of queries pointer
+     * @param bufferQueries Pointer to the position of queries in dnsQueryResponse buffer.
+     */
+    void initializeQueryBufferBegin(unsigned char *queriesBuffer);
+
+
     /*
      * @brief Pointer to the search class in data base.
      * @param bufferRRs Pointer to position in dnsQueryResponse where the RRs must be added.
