@@ -31,7 +31,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 {
 
   size_t beginComment, beginHostIP, endHostIP, beginHostName, endHostName, beginHostAlias, endHostAlias;
-  string HostIP, HostName, HostAlias;
+  string line, HostIP, HostName, HostAlias;
    
   //Positioning in the begining of the buffer
   if (ifsHosts.eof() == true)

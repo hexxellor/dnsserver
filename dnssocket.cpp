@@ -33,7 +33,7 @@ void DNSServerSocket::createSocket(int serverPort)
   }
 
   //Fill fields of the inet address struct
-  memset(&dnsSocketAddr, 0, sizeof(/*dnsSocketAddr*/ struct sockaddr_in));
+  memset(&dnsSocketAddr, 0, sizeof(struct sockaddr_in));
   dnsSocketAddr.sin_family = AF_INET;
   dnsSocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   dnsSocketAddr.sin_port = htons(serverPort);

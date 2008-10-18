@@ -3,6 +3,7 @@
 DNSResolver::DNSResolver()
 {
   newRRsNumber = 0;
+  queriesPointer = NULL;
 }
 
 DNSResolver::DNSResolver(unsigned char *bufferQueries)
@@ -87,7 +88,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   return responseLength;
 }
 
-int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query, unsigned int tPointer)
+int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query, unsigned int tagPointer)
 {
   int nameCounter;
 
@@ -110,7 +111,7 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
   query->rrType = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+1]);
   query->rrClass = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+3]);
 
-  query->tagPointer = tPointer;
+  query->tagPointer = tagPointer;
 
   return (nameCounter + 5);
 }
