@@ -98,7 +98,7 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
     nameCounter = nameCounter + labelLength;
     labelLength = (uint8_t)queryBufferPointer[nameCounter + 1];
     query->Name[nameCounter] = '.';
-    //Maximum size for tags and FQDN (RFC1035)
+    //Maximum size for labels and FQDN (RFC1035)
     if ((labelLength > 63)||(nameCounter > 255))
     {
       return MALFORMED_QUERY;
@@ -111,8 +111,6 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
   query->rrClass = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+3]);
 
   query->tagPointer = tPointer;
-
-  printf("%s, son %i bytes\n", query->Name, nameCounter + 5);
 
   return (nameCounter + 5);
 }
@@ -129,17 +127,17 @@ int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *reso
   responseRecord->rType = htons((uint16_t) A_TYPE);
   responseRecord->rClass = htons((uint16_t)0x0001);
 
-  responseRecord->rTTL = (int32_t)ntohl((int32_t)0x00000000);
+  //Tell the client not to cache the IP
+  responseRecord->rTTL = htonl(0);
 
-  responseRecord->rdLength = ntohs((uint16_t)0x0004);
+  responseRecord->rdLength = htons((uint16_t)0x0004);
 
   if (inet_aton(resolvedIP, &intAddress) == 0)
   {
-    printf("Dir IP no valida\n");
+    printf("DataBase returned a not valid IP\n");
   }
 
   responseRecord->rRDATA = (uint32_t)intAddress.s_addr;
-
 
   return (sizeof(dnsRDataRecord));
 }
@@ -152,24 +150,16 @@ int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *real
   in_addr intAddress;
   dnsCNameRecord *responseRecord = (dnsCNameRecord *)rrBufferPlace;
 
-  printf ("Sumando ptro %i\n", tagPointer);
-
   responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + tagPointer));
-
   responseRecord->rType = htons((uint16_t) CNAME_TYPE);
   responseRecord->rClass = htons((uint16_t) 0x0001);
 
-  responseRecord->rTTL = (int32_t)ntohl((int32_t)0x00000000);
+  //Tell the client not to cache the IP
+  responseRecord->rTTL = htonl((uint32_t)0);
 
   lengthRecord = writeNamefromURL(realName, (rrBufferPlace + sizeof(dnsCNameRecord)));
-//  printf ("%s:%s  %i, size: %i\n", __FILE__, __FUNCTION__, __LINE__,  sizeof(dnsCNameRecord));
 
-  printf("Copiado %s, length calculada %i\n", realName, lengthRecord);
-
-  responseRecord->rdLength = ntohs((uint16_t)lengthRecord);
-
-  //We prepare the pointer for the RDATA response
-//  tagPointer = 12 + abs(&rrBufferPlace[sizeof(dnsCNameRecord)] - rrBufferPlace);
+  responseRecord->rdLength = htons((uint16_t)lengthRecord);
 
   return (sizeof(dnsCNameRecord) + lengthRecord);
 

@@ -24,13 +24,11 @@ char *DNSDataBaseReader::getRealName()
 }
 
 //Search the name in local database. Returns:
-// 1 if the found URL is an URL 
-// 2 if the found URL is an alias
-// -1 if URL is not found
+// NAME_IS_AN_URL if the found URL is an URL 
+// NAME_IS_AN_ALIAS if the found URL is an alias
+// NAME_NOT_FOUND if URL is not found
 int DNSDataBaseReader::searchIPbyURL(char *askedURL)
 {
-  
-  printf("%s: Buscando %s\n", __FUNCTION__, askedURL);
 
   size_t beginComment, beginHostIP, endHostIP, beginHostName, endHostName, beginHostAlias, endHostAlias;
   string HostIP, HostName, HostAlias;
@@ -61,9 +59,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
          endHostName = line.find_first_of(FORBIDDEN_CHARS, beginHostName);
          HostName = line.substr(beginHostName, endHostName - beginHostName);
 
-//         strcpy(realName, HostName.c_str()); 
-
-         //The found name is an URL => return 1            
+         //The found name is an URL           
          if (HostName.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());       
@@ -75,12 +71,11 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
        {
          endHostAlias = line.find_first_of(FORBIDDEN_CHARS, beginHostAlias);
          HostAlias = line.substr(beginHostAlias, endHostAlias - beginHostAlias);         
-         //The found name is an alias => return 2
+         //The found name is an alias
          if (HostAlias.compare(askedURL) == 0)
          {
            strcpy(resolvedIP, HostIP.c_str());
            strcpy(realName, HostName.c_str());
-           cout << " name is an alias for " << HostName << endl;
            return NAME_IS_AN_ALIAS;
          }
 
@@ -88,8 +83,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
     }
   }
 
-  //Not found URL => return -1
-  cout << "Asked URL " << askedURL << " not found!" << endl;
+  //Not found URL
   return NAME_NOT_FOUND;  
 }
 
