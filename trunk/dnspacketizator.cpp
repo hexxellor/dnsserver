@@ -73,6 +73,10 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
 
 void DNSPacketizator::processDnsHeader(unsigned char *msgPointer)
 {
+  uint16_t anCount = 0;
+  uint16_t nsCount = 0;
+  uint16_t arCount = 0;
+
   //Cast to header struct
   dnsHeader *headerPointer = (dnsHeader *)msgPointer;
 
@@ -112,27 +116,21 @@ void DNSPacketizator::generateDnsResponseHeader(unsigned char *msgPointer)
 
   //Write header flags  
   responseHeader->headerFlags = htons(generateResponseHeaderFlags());
+
+  //Set the header counters to their correct values
   responseHeader->qdCount = htons((uint16_t)qdCount);
 
   if ( dnsError == NO_ERROR )
   {
-    addNewRRstoCounters();
-
-    responseHeader->anCount = htons((uint16_t)anCount);
-    responseHeader->nsCount = htons((uint16_t)nsCount);
-    responseHeader->arCount = htons((uint16_t)arCount);
+    responseHeader->anCount = htons( (uint16_t) dnsResolver->getResponseAnRRsNumber() );
   }
   else
   {
     responseHeader->anCount = 0;
-    responseHeader->nsCount = 0;
-    responseHeader->arCount = 0;
   }
-}
 
-void DNSPacketizator::addNewRRstoCounters()
-{
-  anCount = anCount + dnsResolver->getResponseAnRRsNumber();
+  responseHeader->nsCount = 0;
+  responseHeader->arCount = 0;
 }
 
 void DNSPacketizator::initializeDnsQueryResponse()
@@ -150,11 +148,11 @@ uint16_t DNSPacketizator::generateResponseHeaderFlags()
   // -Server not authoritative
   // -Recursive answer 
   uint16_t headerFlags = 0x8180;
+
   //To set the error condition in server
   headerFlags = headerFlags + dnsError;
 
   return headerFlags;
-
 }
 
 unsigned char *DNSPacketizator::getDnsResponse()

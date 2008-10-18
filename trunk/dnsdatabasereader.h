@@ -16,7 +16,7 @@ using namespace std;
 
 /*
  * @class DNSDataBaseReader
- * @brief 
+ * @brief Read the name - IP correspondeces from a 'hosts like' local file
  */
 class DNSDataBaseReader
 {
@@ -46,8 +46,8 @@ class DNSDataBaseReader
     char *getFoundIP();
 
     /*
-     * @brief Function to search in /etc/hosts
-     * @brief Function to search in /etc/hosts
+     * @brief Returns the URL of last resolution
+     * @return Pointer to char array with the URL
      */
     char *getRealName();
 
@@ -58,10 +58,14 @@ class DNSDataBaseReader
      */
     ifstream ifsHosts;
 
-    string line;
-
+    /*
+     * @brief IP of last resolution done
+     */
     char resolvedIP[16];
 
+    /*
+     * @brief URL of last resolution done
+     */
     char realName[255];
 
 };

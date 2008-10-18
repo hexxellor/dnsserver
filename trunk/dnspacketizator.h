@@ -22,12 +22,20 @@ class DNSPacketizator
      */
     DNSPacketizator();
 
+    /*
+     * @brief Parameter constructor.
+     * @param msg Pointer to the DNS request message.
+     */
     DNSPacketizator(unsigned char *msg);
 
+    /*
+     * @brief Default destructor
+     */
     ~DNSPacketizator();
 
     /*
-     * @brief Read a DNS query and set the correct flags
+     * @brief Read a DNS query and set the object variables
+     * @param dnsPktLength Lenght of dns query request in bytes.
      */
     void processDnsQuery(int dnsPktLength);
 
@@ -42,8 +50,6 @@ class DNSPacketizator
      * @return Length of generated DNS response
      */
     int getDnsResponseLength();
-
-//    void setQueryRequestBuffer(unsigned char *msg);
 
   private:
 
@@ -78,48 +84,43 @@ class DNSPacketizator
     uint16_t idDnsQuery;
     uint16_t headerFlags;
     uint16_t qdCount;
-    uint16_t anCount;
-    uint16_t nsCount;
-    uint16_t arCount;
 
     /*
-     * @brief Store the dns message error status
+     * @brief Dns server error status
      */
     RCODE dnsError;
 
     /*
-     * @brief Procces the query request header 
+     * @brief Procces the query request header.
+     * @param msgPointer Pointer to header.
      */
     void processDnsHeader(unsigned char *msgPointer);
 
     /*
-     * @brief Procces the query request header flags
+     * @brief Procces the query request header flags.
+     * @param headerFlags Two words with the flags part of the header (3rd and 4th bytes).
      */
     void processDnsHeaderFlags(unsigned int headerFlags);
 
     /*
-     * @brief Generate header for response
+     * @brief Generate header for response.
+     * @param msgPointer Pointer to dnsQueryResponse header zone.
      */
     void generateDnsResponseHeader(unsigned char *msgPointer);
 
     /*
-     * @brief Actualize the RRs counter for response
-     */
-    void addNewRRstoCounters();
-
-    /*
-     * @brief Initialize the response (pointers ans query part)
+     * @brief Initialize the response (pointers ans query part).
      */
     void initializeDnsQueryResponse();
 
     /*
-     * @brief Generate the header flags for response
-     * @return A 16 bits word with the response flags
+     * @brief Generate the header flags for response.
+     * @return A 16 bits word with the response flags.
      */
     uint16_t generateResponseHeaderFlags();
 
     /*
-     * @brief Object to resolve the query
+     * @brief Pointer to DNSResolver object.
      */
     DNSResolver *dnsResolver;
 };

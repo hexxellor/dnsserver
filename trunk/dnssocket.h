@@ -14,9 +14,6 @@ extern "C"
 //#include <dnsdatabasereader.h>
 #include <dnspacketizator.h>
 
-//¿Cabecera aqui o heredada en otra parte?
-//#include <pthread.h>
-
 // 5 es un buen numero... Comprobar!
 #define NUM_MAX_CLIENTES 5
 
@@ -29,17 +26,19 @@ class DNSServerSocket
 
   public:
 
+    /*
+     * @brief Default constructor.
+     */
     DNSServerSocket();
 
     /*
      * @brief Param constructor.
-     * @param Port where the server wouls listen to incoming connections
+     * @param Port where the server will listen to incoming petitions.
      */
     DNSServerSocket(int dnsPort);
 
     /*
      * @brief Default destructor.
-     *
      */
     ~DNSServerSocket();
 
