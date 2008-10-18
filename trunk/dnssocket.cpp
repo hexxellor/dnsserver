@@ -18,7 +18,6 @@ DNSServerSocket::~DNSServerSocket()
 {
   if (dnsServerSocket > 0)
   {
-    //¿Cerrando el socket por cada cliente o el principal?
     close(dnsServerSocket);
   }
 
@@ -29,7 +28,7 @@ void DNSServerSocket::createSocket(int serverPort)
 
   if ((dnsServerSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
   {
-    printf("Error creando socket, clase DNSServerSocket\n");
+    printf("Error creating the socket\n");
     //throw SomeException;
   }
 
@@ -41,7 +40,7 @@ void DNSServerSocket::createSocket(int serverPort)
 
   if (bind(dnsServerSocket,(struct sockaddr *)&dnsSocketAddr, sizeof (dnsSocketAddr)) == -1)
   {
-    printf("Error haciendo el bind\n");
+    printf("Error binding to socket\n");
     //throw SomeException;
   }
 
@@ -69,10 +68,6 @@ void DNSServerSocket::listenSocket()
           (struct sockaddr *)&dnsClientInetAddr, (socklen_t)clientInetAddrSize) == -1)
       { 
         printf("Error sending DNS response\n");
-      }
-      else
-      {
-        printf("Paquete enviado correctamente\n");
       }
 
     }

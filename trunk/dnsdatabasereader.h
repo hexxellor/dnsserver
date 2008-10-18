@@ -14,6 +14,10 @@ using namespace std;
 #define NUMERIC_CHARS "1234567890"
 #define ALPHABETIC_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+/*
+ * @class DNSDataBaseReader
+ * @brief 
+ */
 class DNSDataBaseReader
 {
   public:
@@ -24,22 +28,25 @@ class DNSDataBaseReader
     DNSDataBaseReader();
 
     /*
-     * @brief Default destructor.
-     *
+     * @brief Default destructor.     
      */
     ~DNSDataBaseReader();
 
     /*
-     * @brief Function to search in /etc/hosts
+     * @brief Function to search an URL in /etc/hosts
+     * @param askedURL The URL we are searching for
+     * @return A value depending on if the found is an URL, an Alias or not found
      */
     int searchIPbyURL(char *askedURL);
 
     /*
-     * @brief Function to search in /etc/hosts
+     * @brief Returns the last resolved IP
+     * @return Pointer to char buffer with the IP
      */
     char *getFoundIP();
 
     /*
+     * @brief Function to search in /etc/hosts
      * @brief Function to search in /etc/hosts
      */
     char *getRealName();
