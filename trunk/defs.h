@@ -5,6 +5,7 @@
 
 //Maximum size for DNS UDP is 512 bytes (RFC1035)
 #define DNS_PKT_SIZE 512
+#define DNS_HEADER_LENGTH 12
 
 struct dnsHeader
 {
@@ -21,7 +22,6 @@ struct dnsQuery
   char Name[255];
   uint16_t rrType;
   uint16_t rrClass;
-  unsigned int tagPointer;
 };
 
 //For struct packing
@@ -59,26 +59,6 @@ enum RCODE
   REFUSED = 5
 };
 
-//RR request types
-//enum RR_TYPE
-//{
-//  A_TYPE = 1,
-//  NS_TYPE = 2,
-//  MD_TYPE = 3,
-//  MF_TYPE = 4,
-//  CNAME_TYPE = 5,
-//  SOA_TYPE = 6,
-//  MB_TYPE = 7,
-//  MG_TYPE = 8,
-//  MR_TYPE = 9,
-//  NULL_TYPE = 10,
-//  WKS_TYPE = 11,
-//  PTR_TYPE = 12,
-//  HINFO_TYPE = 13,
-//  MINFO_TYPE = 14,
-//  MX_TYPE = 15,
-//  TXT_TYPE = 16
-//};
 
 #define A_TYPE 1
 #define CNAME_TYPE 5
