@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define FORBIDDEN_CHARS "\t "
+#define FORBIDDEN_CHARS "\t ,"
 #define NUMERIC_CHARS "1234567890"
 #define ALPHABETIC_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -23,6 +23,12 @@ class DNSDataBaseReader
 
     /*
      * @brief Default constructor.
+     */
+    DNSDataBaseReader();
+
+    /*
+     * @brief Param constructor.
+     * @param hostFile Name of the 'hosts like' text file with the DNS local data.
      */
     DNSDataBaseReader(char *hostFile);
 
@@ -40,9 +46,16 @@ class DNSDataBaseReader
 
     /*
      * @brief Returns the last resolved IP
+     * @param ipIndex The URL we are searching for
      * @return Pointer to char buffer with the IP
      */
-    char *getFoundIP();
+    char *getFoundIP(int ipIndex);
+
+    /*
+     * @brief Returns the last resolved IP
+     * @return Number of IPs asociated with the target URL
+     */
+    int getNumberofIPs();
 
     /*
      * @brief Returns the URL of last resolution
@@ -60,12 +73,28 @@ class DNSDataBaseReader
     /*
      * @brief IP of last resolution done
      */
-    char resolvedIP[16];
+    char **resolvedIPs;
 
     /*
      * @brief URL of last resolution done
      */
     char realName[255];
+
+    /*
+     * @brief Number of IPs asociated with the target URL
+     */
+    int numberIPs;
+
+    /*
+     * @brief Calculate number of IPs in a line
+     * @param line The line to study
+     */
+    void findNumberIPinLine(string &line);
+
+    /*
+     * @brief Number of IPs asociated with the target URL
+     */
+    void deleteIParray();
 
 };
 

@@ -32,6 +32,8 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   int bytesRequest = 0;
   int bytesResponse = 0;
 
+  int numberIPsResolved;
+
   int compressedPointer;
 
   unsigned char *actualRR = bufferRRs;
@@ -57,8 +59,17 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
     {
       case NAME_IS_AN_URL:
       {
-        //Add a RDATA record
-        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), compressedPointer);
+        //Number of IPs asociated with the URL
+        numberIPsResolved = dnsDataBaseReader->getNumberofIPs();
+        //Add a RDATA record for every IP found
+        for (int jRR = 0; jRR < numberIPsResolved; jRR++)
+        {
+          bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(jRR), compressedPointer);
+          //Actualize counters
+          responseLength = responseLength + bytesResponse;
+          actualRR = actualRR + bytesResponse;
+          newRRsNumber++;
+        }
         break;
       }
       case NAME_IS_AN_ALIAS:
@@ -71,9 +82,19 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         compressedPointer = abs(actualRR - bufferRRs) + queryLength + sizeof(dnsCNameRecord);
         actualRR = actualRR + bytesResponse;
         newRRsNumber++;
-  
-        //Add the RDATA record
-        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), compressedPointer);
+
+        //Number of IPs asociated with the URL
+        numberIPsResolved = dnsDataBaseReader->getNumberofIPs();
+        //Add a RDATA record for every IP found
+        for (int jRR = 0; jRR < numberIPsResolved; jRR++)
+        {
+          bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(jRR), compressedPointer);
+          //Actualize counters
+          responseLength = responseLength + bytesResponse;
+          actualRR = actualRR + bytesResponse;
+          newRRsNumber++;
+        }
+
         break;
       }
       default:
@@ -81,10 +102,6 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         return NAME_NOT_FOUND;      
       }
     }  //switch
-
-    responseLength = responseLength + bytesResponse;
-    actualRR = actualRR + bytesResponse;
-    newRRsNumber++;
 
   }  //for
 
