@@ -32,6 +32,8 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   int bytesRequest = 0;
   int bytesResponse = 0;
 
+  int compressedPointer;
+
   unsigned char *actualRR = bufferRRs;
   unsigned char *actualQuery = queriesPointer;
 
@@ -39,12 +41,14 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
 
   for (int i = 0; i < nQueries; i++)
   {
-    bytesRequest = readQueryRequest(actualQuery, &atomicQuery, requestLength + 12);
+    bytesRequest = readQueryRequest(actualQuery, &atomicQuery,   queryLength - DNS_HEADER_LENGTH  );
 
     if (bytesRequest == MALFORMED_QUERY)
     {
       return MALFORMED_QUERY;
     }
+
+    compressedPointer = abs(queriesPointer - actualQuery) + DNS_HEADER_LENGTH;
 
     requestLength = requestLength + bytesRequest;
     actualQuery = actualQuery + bytesRequest;
@@ -54,22 +58,22 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
       case NAME_IS_AN_URL:
       {
         //Add a RDATA record
-        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
+        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), compressedPointer);
         break;
       }
       case NAME_IS_AN_ALIAS:
       {
         //Add a CNAME record
-        bytesResponse = addCNAMERecordResponse(actualRR, dnsDataBaseReader->getRealName(), atomicQuery.tagPointer);
+        bytesResponse = addCNAMERecordResponse(actualRR, dnsDataBaseReader->getRealName(), compressedPointer);
 
-        //Actualize some values to add an RDATA record
-        atomicQuery.tagPointer = abs(actualRR - bufferRRs) + queryLength + 12;
+        //Actualize some values to add an RDATA record     
         responseLength = responseLength + bytesResponse;
+        compressedPointer = abs(actualRR - bufferRRs) + queryLength + sizeof(dnsCNameRecord);
         actualRR = actualRR + bytesResponse;
         newRRsNumber++;
   
         //Add the RDATA record
-        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), atomicQuery.tagPointer);
+        bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(), compressedPointer);
         break;
       }
       default:
@@ -84,7 +88,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
 
   }  //for
 
-  if (requestLength != (queryLength - 12))
+  if (requestLength != (queryLength - DNS_HEADER_LENGTH))
   {
     return MALFORMED_QUERY;
   }
@@ -92,7 +96,7 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   return responseLength;
 }
 
-int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query, unsigned int tagPointer)
+int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *query, unsigned int bufferSize)
 {
   int nameCounter;
 
@@ -104,7 +108,8 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
     labelLength = (uint8_t)queryBufferPointer[nameCounter + 1];
     query->Name[nameCounter] = '.';
     //Maximum size for labels and FQDN (RFC1035)
-    if ((labelLength > 63)||(nameCounter > 255))
+    //If the recepction buffer is over-readed => Malformed query
+    if ((labelLength > 63)||(nameCounter > 255)|| (nameCounter +4 > bufferSize))
     {
       return MALFORMED_QUERY;
     }
@@ -114,8 +119,6 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
 
   query->rrType = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+1]);
   query->rrClass = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+3]);
-
-  query->tagPointer = tagPointer;
 
   return (nameCounter + 5);
 }
@@ -135,7 +138,7 @@ int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *reso
   //Tell the client not to cache the IP
   responseRecord->rTTL = htonl(0);
 
-  responseRecord->rdLength = htons((uint16_t)0x0004);
+  responseRecord->rdLength = htons((uint16_t)sizeof(intAddress.s_addr));
 
   if (inet_aton(resolvedIP, &intAddress) == 0)
   {
