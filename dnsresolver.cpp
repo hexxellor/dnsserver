@@ -45,9 +45,10 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
   {
     bytesRequest = readQueryRequest(actualQuery, &atomicQuery,   queryLength - DNS_HEADER_LENGTH  );
 
-    if (bytesRequest == MALFORMED_QUERY)
+    //For return of posible errors
+    if (bytesRequest < 0)
     {
-      return MALFORMED_QUERY;
+      return bytesRequest;
     }
 
     compressedPointer = abs(queriesPointer - actualQuery) + DNS_HEADER_LENGTH;
@@ -65,6 +66,11 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         for (int jRR = 0; jRR < numberIPsResolved; jRR++)
         {
           bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(jRR), compressedPointer);
+          if (bytesRequest < 0)
+          {
+            return bytesRequest;
+          }
+
           //Actualize counters
           responseLength = responseLength + bytesResponse;
           actualRR = actualRR + bytesResponse;
@@ -89,6 +95,11 @@ int DNSResolver::resolveQueryRequest(unsigned char *bufferRRs, unsigned int nQue
         for (int jRR = 0; jRR < numberIPsResolved; jRR++)
         {
           bytesResponse = addRDATARecordResponse(actualRR, dnsDataBaseReader->getFoundIP(jRR), compressedPointer);
+          if (bytesRequest < 0)
+          {
+            return bytesRequest;
+          }
+
           //Actualize counters
           responseLength = responseLength + bytesResponse;
           actualRR = actualRR + bytesResponse;
@@ -126,7 +137,7 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
     query->Name[nameCounter] = '.';
     //Maximum size for labels and FQDN (RFC1035)
     //If the recepction buffer is over-readed => Malformed query
-    if ((labelLength > 63)||(nameCounter > 255)|| (nameCounter +4 > bufferSize))
+    if ((labelLength > 63)||(nameCounter > 255)|| (nameCounter + 4 > bufferSize))
     {
       return MALFORMED_QUERY;
     }
@@ -136,6 +147,11 @@ int DNSResolver::readQueryRequest(unsigned char*queryBufferPointer, dnsQuery *qu
 
   query->rrType = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+1]);
   query->rrClass = ntohs(*(uint16_t *)&queryBufferPointer[nameCounter+3]);
+
+  if ((query->rrType != A_TYPE) || (query->rrClass != IN_CLASS))
+  {
+    return UNSUPPORTED_RRTYPE_RRCLASS;
+  }
 
   return (nameCounter + 5);
 }
@@ -150,7 +166,7 @@ int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *reso
 
   responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + tagPointer));
   responseRecord->rType = htons((uint16_t) A_TYPE);
-  responseRecord->rClass = htons((uint16_t)0x0001);
+  responseRecord->rClass = htons((uint16_t) IN_CLASS);
 
   //Tell the client not to cache the IP
   responseRecord->rTTL = htonl(0);
@@ -159,7 +175,7 @@ int DNSResolver::addRDATARecordResponse(unsigned char *rrBufferPlace, char *reso
 
   if (inet_aton(resolvedIP, &intAddress) == 0)
   {
-    printf("DataBase returned a not valid IP\n");
+    return SERVER_INTERNAL_ERROR;
   }
 
   responseRecord->rRDATA = (uint32_t)intAddress.s_addr;
@@ -177,7 +193,7 @@ int DNSResolver::addCNAMERecordResponse(unsigned char *rrBufferPlace, char *real
 
   responseRecord->rName = htons((uint16_t)(COMPRESSED_MASK + tagPointer));
   responseRecord->rType = htons((uint16_t) CNAME_TYPE);
-  responseRecord->rClass = htons((uint16_t) 0x0001);
+  responseRecord->rClass = htons((uint16_t) IN_CLASS);
 
   //Tell the client not to cache the IP
   responseRecord->rTTL = htonl((uint32_t)0);

@@ -6,6 +6,7 @@
 #include <string>
 
 #include <defs.h>
+#include <dnsexception.h>
 
 using namespace std;
 
@@ -23,14 +24,16 @@ class DNSDataBaseReader
 
     /*
      * @brief Default constructor.
+     * @throw FileNotFoundException If the 'hosts' file is not found.
      */
-    DNSDataBaseReader();
+    DNSDataBaseReader() throw (FileNotFoundException);
 
     /*
      * @brief Param constructor.
      * @param hostFile Name of the 'hosts like' text file with the DNS local data.
+     * @throw FileNotFoundException If the 'hosts' file is not found.
      */
-    DNSDataBaseReader(char *hostFile);
+    DNSDataBaseReader(char *hostFile) throw (FileNotFoundException);
 
     /*
      * @brief Default destructor.     
