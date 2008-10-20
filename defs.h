@@ -1,7 +1,13 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-#include <stdint.h>
+extern "C"
+{
+  #include <stdint.h>
+  //To include in all files
+  #include <string.h>
+  #include <stdlib.h>
+}
 
 //Maximum size for DNS UDP is 512 bytes (RFC1035)
 #define DNS_PKT_SIZE 512
