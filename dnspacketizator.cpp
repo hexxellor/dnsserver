@@ -35,12 +35,11 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
   dnsRequestLength = dnsPktLength;
   dnsResponseLength = dnsRequestLength;
 
-  //First intialize answer packet
-  initializeDnsQueryResponse();
-
   //Then study the request. Is it right?
   if (dnsRequestLength >= DNS_HEADER_LENGTH)
   {
+    //First intialize answer packet
+    initializeDnsQueryResponse();
     //Process header
     processDnsHeader(dnsQueryRequest);
   }
@@ -49,7 +48,7 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
     //Create minimum info to generate a header and exit!
     qdCount = 0;
     idDnsQuery = ntohs(*(uint16_t *)dnsQueryRequest);
-    dnsResponseLength = DNS_HEADER_LENGTH;
+    dnsResponseLength = DNS_HEADER_LENGTH;    
     dnsError = FORMAT_ERROR;
   }
 
@@ -67,6 +66,7 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
         dnsError = FORMAT_ERROR;
         //If there are a malformed query, we return only the header
         dnsResponseLength = DNS_HEADER_LENGTH;
+        qdCount = 0;
         break;
       }
       case UNSUPPORTED_RRTYPE_RRCLASS:
