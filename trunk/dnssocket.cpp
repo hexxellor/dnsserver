@@ -8,13 +8,19 @@ DNSServerSocket::DNSServerSocket()
   memset(receivedData, 0, DNS_PKT_SIZE);
 }
 
-DNSServerSocket::DNSServerSocket(int dnsPort, DNSPacketizator *dnsPacketizatorObject)
+DNSServerSocket::DNSServerSocket(int dnsPort, DNSPacketizator *dnsPacketizatorObject) throw (SocketException)
 {
   dnsServerSocket = -1;
 
   memset(receivedData, 0, DNS_PKT_SIZE);
-  createSocket(dnsPort);
-
+  try
+  {
+    createSocket(dnsPort);
+  }
+  catch(SocketException)
+  {
+    throw SocketException();
+  }
   dnsPacketizator = dnsPacketizatorObject;
   dnsPacketizator->initializeBufferPointer(receivedData);
 }
@@ -28,15 +34,14 @@ DNSServerSocket::~DNSServerSocket()
 
 }
 
-void DNSServerSocket::createSocket(int serverPort)
+void DNSServerSocket::createSocket(int serverPort) throw (SocketException)
 {
   //Sockaddr struct for the socket
   struct sockaddr_in dnsSocketAddr;
 
   if ((dnsServerSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
   {
-    printf("Error creating the socket\n");
-    //throw SomeException;
+    throw SocketException();
   }
 
   //Fill fields of the inet address struct
@@ -47,8 +52,7 @@ void DNSServerSocket::createSocket(int serverPort)
 
   if (bind(dnsServerSocket,(struct sockaddr *)&dnsSocketAddr, sizeof (sockaddr_in)) == -1)
   {
-    printf("Error binding to socket\n");
-    //throw SomeException;
+    throw SocketException();
   }
 
 }
@@ -73,13 +77,16 @@ void DNSServerSocket::listenSocket()
     }
     else
     {
+      //If the incoming packet is a request then forget it!
+      if((receivedData[2] & 0x80) == 0)
+      {
+        dnsPacketizator->processDnsQuery(receivedBytes);
 
-      dnsPacketizator->processDnsQuery(receivedBytes);
-
-      if ( sendto(dnsServerSocket, dnsPacketizator->getDnsResponse(), dnsPacketizator->getDnsResponseLength(), 0, \
-          (struct sockaddr *)&dnsClientInetAddr, (socklen_t)clientInetAddrSize) == -1)
-      { 
-        printf("Error sending DNS response\n");
+        if ( sendto(dnsServerSocket, dnsPacketizator->getDnsResponse(), dnsPacketizator->getDnsResponseLength(), 0, \
+            (struct sockaddr *)&dnsClientInetAddr, (socklen_t)clientInetAddrSize) == -1)
+        { 
+          printf("Error sending DNS response\n");
+        }
       }
     }
   } //while

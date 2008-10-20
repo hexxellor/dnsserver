@@ -31,8 +31,9 @@ class DNSServerSocket
      * @brief Parameter constructor.
      * @param dnsPort Port where the server will listen to incoming petitions.
      * @param dnsPacketizatorObject Pointer to dnsPacketizator object in memory.
+     * @throw SocketException If it was some error creating the socket.
      */
-    DNSServerSocket(int dnsPort, DNSPacketizator *dnsPacketizatorObject);
+    DNSServerSocket(int dnsPort, DNSPacketizator *dnsPacketizatorObject) throw (SocketException);
 
     /*
      * @brief Default destructor.
@@ -65,8 +66,9 @@ class DNSServerSocket
     /*
      * @brief Create the server socket and initialize the corresponding structs.
      * @param serverPort The port where the server wait for the client.
+     * @throw SocketException If it was some error creating the socket.
      */
-    void createSocket(int serverPort);
+    void createSocket(int serverPort) throw (SocketException);
 
 };
 

@@ -12,7 +12,7 @@ DNSPacketizator::DNSPacketizator(DNSResolver *dnsResolverObject)
   dnsError = NO_ERROR;
 
   dnsResolver = dnsResolverObject;
-  dnsResolver->initializeQueryBufferBegin(dnsQueryResponse + 12);
+  dnsResolver->initializeQueryBufferBegin(dnsQueryResponse + DNS_HEADER_LENGTH);
 }
 
 DNSPacketizator::~DNSPacketizator()
@@ -39,7 +39,19 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
   initializeDnsQueryResponse();
 
   //Then study the request. Is it right?
-  processDnsHeader(dnsQueryRequest);
+  if (dnsRequestLength >= DNS_HEADER_LENGTH)
+  {
+    //Process header
+    processDnsHeader(dnsQueryRequest);
+  }
+  else
+  {
+    //Create minimum info to generate a header and exit!
+    qdCount = 0;
+    idDnsQuery = ntohs(*(uint16_t *)dnsQueryRequest);
+    dnsResponseLength = DNS_HEADER_LENGTH;
+    dnsError = FORMAT_ERROR;
+  }
 
   if (dnsError == NO_ERROR)
   {
@@ -53,13 +65,15 @@ void DNSPacketizator::processDnsQuery(int dnsPktLength)
       case MALFORMED_QUERY:
       {
         dnsError = FORMAT_ERROR;
+        //If there are a malformed query, we return only the header
+        dnsResponseLength = DNS_HEADER_LENGTH;
         break;
       }
-//      case UNSUPPORTED_OPTION:
-//      {
-//        dnsError = NOT_IMPLEMENTED;
-//        break;
-//      }
+      case UNSUPPORTED_RRTYPE_RRCLASS:
+      {
+        dnsError = NOT_IMPLEMENTED;
+        break;
+      }
       default:
       {
         dnsResponseLength = dnsResponseLength + dnsResponseRRsLength;
@@ -137,7 +151,7 @@ void DNSPacketizator::generateDnsResponseHeader(unsigned char *msgPointer)
 void DNSPacketizator::initializeDnsQueryResponse()
 {
   //Copy of query section from response to request.
-  memcpy(&dnsQueryResponse[12], &dnsQueryRequest[12], (dnsRequestLength - 12));
+  memcpy(&dnsQueryResponse[DNS_HEADER_LENGTH], &dnsQueryRequest[DNS_HEADER_LENGTH], (dnsRequestLength - DNS_HEADER_LENGTH));
   dnsQueryResponseRRsPointer = &dnsQueryResponse[dnsRequestLength];
 }
 

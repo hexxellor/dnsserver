@@ -1,22 +1,43 @@
 #include <dnsdatabasereader.h>
 
-DNSDataBaseReader::DNSDataBaseReader()
+DNSDataBaseReader::DNSDataBaseReader() throw (FileNotFoundException)
 {
-  //File opening
-  ifsHosts.open("hosts");
   numberIPs = 0;
   strcpy(realName, "No name");
   resolvedIPs = NULL;
+
+  //File opening: setting and returning exceptions
+  ifsHosts.exceptions( ifstream::badbit | ifstream::failbit | ifstream::eofbit);
+  try 
+  {
+    ifsHosts.open("hosts");
+  }
+  catch (ifstream::failure FileNotFound)
+  {
+    throw FileNotFoundException();
+  }
+
 }
 
 
-DNSDataBaseReader::DNSDataBaseReader(char *hostFile)
+DNSDataBaseReader::DNSDataBaseReader(char *hostFile) throw (FileNotFoundException)
 {
-  //File opening
-  ifsHosts.open(hostFile);
+
   numberIPs = 0;
   strcpy(realName, "No name");
   resolvedIPs = NULL;
+
+  //File opening: setting and returning exceptions
+  ifsHosts.exceptions( ifstream::badbit | ifstream::failbit | ifstream::eofbit);
+  try 
+  {
+    ifsHosts.open(hostFile);
+  }
+  catch (ifstream::failure FileNotFound)
+  {
+    throw FileNotFoundException();
+  }
+
 }
 
 DNSDataBaseReader::~DNSDataBaseReader()
@@ -84,10 +105,23 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
   {
     ifsHosts.clear();
   }
+
   ifsHosts.seekg(0, ios_base::beg);
 
-  while (getline(ifsHosts, line))
+  while (ifsHosts.eof() == false)
   {
+    try
+    {
+      getline(ifsHosts, line);
+    }
+    catch (ifstream::failure)
+    {
+      if (ifsHosts.eof() == true)
+      {
+        //Not found URL (reached EOF)
+        return NAME_NOT_FOUND;  
+      }
+    }
 
     //Is the URL in this line?
     if (line.find(askedURL) != string::npos)
@@ -137,7 +171,6 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
         {
           endMark = line.find_first_of(FORBIDDEN_CHARS, beginMark);
           HostName = line.substr(beginMark, endMark - beginMark);
-
           //The found name is an URL           
           if (HostName.compare(askedURL) == 0)
           {  
@@ -148,8 +181,7 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
         if ((beginMark = line.find_first_of(ALPHABETIC_CHARS, endMark)) != string::npos)
         {
           endMark = line.find_first_of(FORBIDDEN_CHARS, beginMark);
-          HostAlias = line.substr(beginMark, endMark - beginMark); 
-     
+          HostAlias = line.substr(beginMark, endMark - beginMark);      
           //The found name is an alias
           if (HostAlias.compare(askedURL) == 0)
           {
@@ -158,13 +190,11 @@ int DNSDataBaseReader::searchIPbyURL(char *askedURL)
           }  
         }
         //////////////////////////////////////////////////////////////////////////////////////
-
       }
     }
 
   } //while
 
-  //Not found URL
-  return NAME_NOT_FOUND;  
+
 }
 

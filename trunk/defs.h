@@ -7,6 +7,7 @@
 #define DNS_PKT_SIZE 512
 #define DNS_HEADER_LENGTH 12
 
+#pragma pack (2)
 struct dnsHeader
 {
   uint16_t idDnsQuery;
@@ -15,13 +16,6 @@ struct dnsHeader
   uint16_t anCount;
   uint16_t nsCount;
   uint16_t arCount;
-};
-
-struct dnsQuery
-{
-  char Name[255];
-  uint16_t rrType;
-  uint16_t rrClass;
 };
 
 //For struct packing
@@ -45,7 +39,14 @@ struct dnsCNameRecord
   uint16_t rClass;
   uint32_t rTTL;
   uint16_t rdLength;
-  //RDATA will be copied to buffer in running time
+  //RDATA will be generated in buffer in running time
+};
+
+struct dnsQuery
+{
+  char Name[255];
+  uint16_t rrType;
+  uint16_t rrClass;
 };
 
 //DNS Header error codes
@@ -59,22 +60,19 @@ enum RCODE
   REFUSED = 5
 };
 
-
 #define A_TYPE 1
 #define CNAME_TYPE 5
 
-//Queries classes
-enum QCLASS
-{
-  IN_CLASS = 1,
-  CS_CLASS = 2,
-  CH_CLASS = 3,
-  HS_CLASS = 4
-};
+#define IN_CLASS 1
 
-#define MALFORMED_QUERY -2
-#define NAME_NOT_FOUND -1
+//Possible returns of 
 #define NAME_IS_AN_URL 1
 #define NAME_IS_AN_ALIAS 2
+#define NAME_NOT_FOUND -1
+
+//Errors processing the query
+#define MALFORMED_QUERY -2
+#define UNSUPPORTED_RRTYPE_RRCLASS -3
+#define SERVER_INTERNAL_ERROR -4
 
 #endif /* DEFS_H */

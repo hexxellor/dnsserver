@@ -10,8 +10,6 @@ extern "C"
 #include <defs.h>
 #include <dnsdatabasereader.h>
 
-#include <string>
-
 #define COMPRESSED_MASK 0xc000
 
 /*
