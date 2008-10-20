@@ -11,9 +11,9 @@
  209.85.133.18  mail.google.com
  216.239.59.97  ssl.google-analytics.com
 
-#google
- 66.102.9.99	 www.google.com   google
- 66.102.9.104    www.google.es
+#google.com
+ 66.102.9.99, 66.102.9.104, 66.102.9.147	 www.l.google.com   www.google.com
+ 66.102.9.104, 216.239.59.99, 216.239.59.147, 216.239.59.103, 216.239.59.103	www.google.com 	www.google.es
 
 #yahoo
  87.248.120.129	 www.yahoo.com	yahoo
