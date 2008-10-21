@@ -114,7 +114,7 @@ int main (int argc, char *argv[])
   }
   cout << "OK!" << endl;
 
-   cout << "Listening for incoming petitions" << endl,
+   cout << "Listening for incoming petitions." << endl,
   //Wait for clients & process them  
   dnsServerSocket->listenSocket();
 

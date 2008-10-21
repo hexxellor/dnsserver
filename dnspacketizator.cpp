@@ -3,12 +3,14 @@
 DNSPacketizator::DNSPacketizator()
 {
   idDnsQuery = 0;
+  qdCount = 0;
   dnsError = NO_ERROR;
 }
 
 DNSPacketizator::DNSPacketizator(DNSResolver *dnsResolverObject)
 {
   idDnsQuery = 0;
+  qdCount = 0;
   dnsError = NO_ERROR;
 
   dnsResolver = dnsResolverObject;
